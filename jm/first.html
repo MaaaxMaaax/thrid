@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Page Title</title>
+
+	<meta content="width=device-width, initial-scale=1" name="viewport"></meta>
+
+<link rel="stylesheet" href="jquery.mobile-1.4.1.css" />
+<link rel="stylesheet" href="style.css" />
+<script src="jquery.js"></script>
+<script src="jquery.mobile-1.4.1.js"></script>
+<script type="text/javascript" src="js.js"></script>
+<script type="text/javascript">
+	
+</script>
+</head>
+<body>
+
+<div data-role="page" id="splash">
+	<div data-role="main" class="ui-content">
+		<form class="center-div">
+			<img src="logo.png" class="logo">
+			<input type="text" name="email" placeholder="Email...">
+			<input type="password" name="password" placeholder="Password...">
+			<p style="margin-top: 40px;"class="center"><a href="" class="connect" data-transition="slide">Connect</a></p>
+		</form>
+	</div><!-- /content -->
+</div><!-- /page -->
+
+
+<div data-role="page" id="news">
+
+	<div data-role="header" class="header" data-position="fixed" data-tap-toggle="false">
+		<img src="logo.png" class="logo">
+	</div><!-- /header -->
+
+	<div data-role="main" class="ui-content">
+		<ul class="ul-news">
+			
+		</ul>
+		<a href="" class="load_more">Load More</a>
+	</div><!-- /content -->
+<div data-role="footer" data-position="fixed" class="footer" data-tap-toggle="false">
+	<div data-role="navbar" data-grid="c">
+	    <ul>
+	        <li><a href="#news" data-transition="none" class="ui-btn-active ui-state-persist"><img src="basket.png" class="icon"></a></li>
+	        <li><a href="#player" data-transition="none" class=""><img src="youtube.png" class="icon"></a></li>
+	        <li><a href="#box" data-transition="none"><img src="folder.png" class="icon"></a></li>
+	        <li><a href="#splash" class="logout" data-transition="slide" data-direction="reverse" ><img src="logout.png" class="icon"></a></li>
+	    </ul>
+	</div><!-- /navbar -->
+</div><!-- /footer -->
+</div><!-- /page -->
+
+<script type="text/javascript">
+
+</script>
+
+<div data-role="page" id="player">
+
+	<div data-role="header" class="header" data-position="fixed" data-tap-toggle="false">
+		<img src="logo.png" class="logo">		<p class="box-btn">Box <img src="arrow_down.png"></p>
+	</div><!-- /header -->
+
+	<div data-role="main" class="ui-content">
+		<iframe id="ytplayer" type="text/html" width="100%%" height="250px" src="https://www.youtube.com/embed/o8VZX4sHn-4?enablejsapi=1&controls=0&showinfo=0" frameborder="0"></iframe>
+		
+		<div>
+			<form class="full-width-slider">
+			    <input type="range" name="slider-12" id="slider-12" min="0" max="100" value="0" data-highlight="true">
+			</form>
+		</div>
+
+		<div>
+			<p class="center artiste-titre">Cassio Kohl - <strong>Broken</strong></p>
+		</div>
+
+		<div class="control">
+			<img class="previous" src="previous.png">
+			<img class="play" src="play.png">
+			<img class="next" src="next.png">
+		</div>
+
+		<div class="ui-grid-b more">
+		    <div class="ui-block-a profile-space">
+		    	<img src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-prn1/t5/623639_808759640_1211463384_q.jpg">
+		    	<p><a href="">Max La Menace</a></p>
+		    </div>
+		    <div class="ui-block-c info">
+			    <div class="center">
+			    	<p class="genre">Electronic</p>
+			    	<p class="date">2 days ago</p>
+			    </div>
+		    </div>
+		    <div class="ui-block-c next-video">
+		    	
+		    </div>
+		</div><!-- /grid-a -->
+
+		<script>
+	/*
+			#######
+			VARIABLES
+			#######
+	*/
+
+
+	var user_id = 0;
+	var videos = [];
+	var start = 0;
+	var display = 5;
+	var SONG;
+
+
+	/*
+			#######
+			CONNEXION
+			#######
+	*/
+
+	$('html').on("click", ".connect", connect);
+
+	function connect()
+	{
+		$.ajax({
+				type: "POST",
+				url: "../ajax/app/signin.php",
+				data: $('form.center-div').serialize(),
+				cache: false,
+				success: function(html)
+				{
+					alert();
+					if(html.toLowerCase().indexOf("wrong") >= 0)
+					{
+						$('form.center-div').append('<p class="center">Wrong combination email/password</p>')
+					} else
+					{
+						user_id = html;
+						initialize();
+						$('a[href="#news"]').trigger( "click" );
+					}
+				}
+		});
+	}
+
+	/*
+			#######
+			DATAAAA
+			#######
+	*/
+
+	function initialize()
+	{
+		//First retrieval of datas for the NEWS NEWS NEWS
+		$.ajax({
+				type: "POST",
+				url: "../ajax/app/news.php",
+				data: "user_id="+user_id+"&start="+start+"&display="+display,
+				cache: false,
+				success: function(html)
+				{
+					start += display;
+					console.log('Start:'+start);
+					console.log(html);
+					video_to_display = [];
+					for (var i = html.length - 1; i >= 0; i--) {
+						video_to_display.push(html[i]);
+					};
+					//Display the datas
+
+					for (var i = video_to_display.length - 1; i >= 0; i--) {
+						console.log('Kikou');
+						var striiing = '<a href="#player" data-transition="none" class="ajax-player" data-id="'+video_to_display[i].id+'" data-youtube="'+video_to_display[i].youtube+'" data-user="'+video_to_display[i].user+'" data-picture="'+video_to_display[i].picture+'" data-genre="'+video_to_display[i].genre+'" data-date="'+video_to_display[i].date+'" data-artist="'+video_to_display[i].artist+'" data-title="'+video_to_display[i].title+'"><li><img class="cover-pic" src="http://img.youtube.com/vi/'+video_to_display[i].youtube+'/mqdefault.jpg"><div class="ui-grid-a"><div class="ui-block-a song-info"><p class="artist-title">'+video_to_display[i].artist+' - <strong>'+video_to_display[i].title+'</strong></p><p class="genre">'+video_to_display[i].genre+'</p><p class="date">'+video_to_display[i].date+'</p></div><div class="ui-block-b song-user"><img src="'+video_to_display[i].picture+'"><p>'+video_to_display[i].user+'</p></div></div><!-- /grid-a --></li></a>';
+							$('ul.ul-news').append(striiing);
+					};
+				}
+		});
+
+		//First retrieval of RECORD BOX
+		$.ajax({
+				type: "POST",
+				url: "../ajax/app/box.php",
+				data: "user_id="+user_id,
+				cache: false,
+				success: function(html)
+				{
+					console.log(html);
+					video_to_display = [];
+					for (var i = html.length - 1; i >= 0; i--) {
+						video_to_display.push(html[i]);
+					};
+					//Display the datas
+					for (var i = video_to_display.length - 1; i >= 0; i--) {
+						var striiing = '<a href="#player" class="ajax-player" data-transition="none" data-id="'+video_to_display[i].id+'" data-youtube="'+video_to_display[i].youtube+'" data-user="'+video_to_display[i].user+'" data-picture="'+video_to_display[i].picture+'" data-genre="'+video_to_display[i].genre+'" data-date="'+video_to_display[i].date+'" data-artist="'+video_to_display[i].artist+'" data-title="'+video_to_display[i].title+'"><li><p class="artist-title">'+video_to_display[i].artist+' - <strong>'+video_to_display[i].title+'</strong></p><p class="genre">'+video_to_display[i].genre+'</p><img class="arrow" src="arrow_right.png"></li></a>';
+					$('.record-box').append(striiing);
+					};
+				}
+		});
+	}
+
+	
+	/*
+			#######
+			CONTROLS
+			#######
+	*/
+
+	//LOGOUT
+	$('html').on('click', '.logout', logout);
+
+	function logout() {
+		alert();
+		$('a[href="#splash"]').trigger( "click" );
+		user_id = 0;
+		start=0;
+		$('#news li').remove();
+	}
+
+	
+	//LOAD MORE
+	$('html').on("click", ".load_more", load_more)
+
+	function load_more() {
+
+		$.ajax({
+			type: "POST",
+			url: "../ajax/app/news.php",
+			data: "user_id="+user_id+"&start="+start+"&display="+display,
+			cache: false,
+			success: function(html)
+			{
+				if (html.length >0)
+				{
+					start += display;
+					console.log('Start:'+start);
+					console.log(html);
+					video_to_display = [];
+					for (var i = html.length - 1; i >= 0; i--) {
+						video_to_display.push(html[i]);
+					};
+					console.log(video_to_display);
+					//Display the datas
+
+					for (var i = video_to_display.length - 1; i >= 0; i--) {
+						console.log('Kikou');
+						var striiing = '<a href="#player" class="ajax-player" data-transition="none" data-id="'+video_to_display[i].id+'" data-youtube="'+video_to_display[i].youtube+'" data-user="'+video_to_display[i].user+'" data-picture="'+video_to_display[i].picture+'" data-genre="'+video_to_display[i].genre+'" data-date="'+video_to_display[i].date+'" data-artist="'+video_to_display[i].artist+'" data-title="'+video_to_display[i].title+'"><li><img class="cover-pic" src="http://img.youtube.com/vi/'+video_to_display[i].youtube+'/mqdefault.jpg"><div class="ui-grid-a"><div class="ui-block-a song-info"><p class="artist-title">'+video_to_display[i].artist+' - <strong>'+video_to_display[i].title+'</strong></p><p class="genre">'+video_to_display[i].genre+'</p><p class="date">'+video_to_display[i].date+'</p></div><div class="ui-block-b song-user"><img src="'+video_to_display[i].picture+'"><p>'+video_to_display[i].user+'</p></div></div><!-- /grid-a --></li></a>';
+							$('ul.ul-news').append(striiing);
+					};
+					if(playPlease){
+						nextSong();
+						playPlease = false;
+					}
+				} 
+				else
+				{
+					$('ul.ul-news').append('<p class="center end">The is the end (my friend)!</p>');
+					$('.load_more').remove();
+				}
+				
+			}
+	});
+	}
+
+
+
+	/*
+			#######
+			YouTube Initialization
+			#######
+	*/
+	var playing = false;
+	// 2. This code loads the IFrame Player API code asynchronously.
+	var tag = document.createElement('script');
+
+	tag.src = "https://www.youtube.com/iframe_api";
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+	// 3. This function creates an <iframe> (and YouTube player)
+	//    after the API code downloads.
+	var player;
+	function onYouTubeIframeAPIReady() {
+		player = new YT.Player('ytplayer', {
+		  videoId: '',
+		  events: {
+		    'onReady': onPlayerReady,
+		    'onStateChange' : onStateChange,
+		    'onError' : nextSong
+		  }
+		});
+	}
+
+	// 4. The API will call this function when the video player is ready.
+	function onPlayerReady(event) {
+
+	}
+
+	function onStateChange(event) {
+		if (event.data == YT.PlayerState.ENDED)
+		{
+			nextSong();
+		}
+	}
+
+	$('html').on('click', '.play', play);
+	$('html').on('click', '.pause', pause);
+	$('html').on('click', '.next', nextSong);
+	$('html').on('click', '.previous', previousSong);
+	$('html').on('mouseUp', '.ui-slider-handle', seek);
+	$('.full-width-slider').mouseup(function(){
+		var percent = ($(this).find('.ui-slider-handle').attr('aria-valuetext'))/100;
+		var duration = player.getDuration();
+		var time = percent*duration;
+		player.seekTo(time, true);
+	});
+
+	var playPlease = false;
+	function nextSong()
+	{
+		if (SONG.next().length == 0)
+			{
+				playPlease = true;
+				load_more();
+			}
+		else if(SONG.next())
+			{
+				SONG.next().click();
+			}
+	}
+
+	function previousSong()
+	{
+		if(SONG.prev())
+			{
+				SONG.prev().click();
+			}
+	}
+
+	(function repeat(){
+	if(playing)
+		{
+			percent = player.getCurrentTime()/player.getDuration()*100+'%';
+		    $('.ui-slider-handle').css('left', percent);
+		    $('.ui-slider-bg').css('width', percent);
+		}
+		setTimeout(repeat, 1000);
+	})();
+
+	function seek(){
+		
+	}
+
+	function play() {
+		if(player){
+			player.playVideo();
+			$(this).attr('src', 'pause.png');
+			$(this).toggleClass('play');
+			$(this).toggleClass('pause');
+			playing = true;
+		}
+	}
+	function pause() {
+		player.pauseVideo();
+		$(this).attr('src', 'play.png');
+		$(this).toggleClass('play');
+		$(this).toggleClass('pause');
+		playing = false;
+	} 
+
+	//Transmission of data between the pages and the record
+	$('html').on("click", ".ajax-player", ajax_player);
+
+	function ajax_player() {
+		SONG = $(this);
+		$('.speaker').remove();
+		SONG.find('.artist-title').append('<img class="speaker" src="volume_2.png">');
+		var id = $(this).attr('data-youtube');
+		player.loadVideoById(id);
+		$('.play').click();
+		$('#player .artiste-titre').html($(this).attr('data-artist')+' - <strong>'+$(this).attr('data-title')+'</strong>');
+		$('#player .genre').html($(this).attr('data-genre'));
+		$('#player .date').html($(this).attr('data-date'));
+		var picture = $(this).attr('data-picture');
+		$('#player .profile-space img').attr('src', picture);
+		$('#player .profile-space p a').html($(this).attr('data-user'));
+	}     
+    </script> 
+	</div><!-- /content -->
+	<div data-role="footer" data-position="fixed" class="footer" data-tap-toggle="false">
+		<div data-role="navbar" data-grid="b">
+		    <ul>
+		        <li><a href="#news" data-transition="none" data-direction="reverse"><img src="basket.png" class="icon"></a></li>
+		        <li><a href="#player" data-transition="none" class="ui-btn-active ui-state-persist"><img src="youtube.png" class="icon"></a></li>
+		        <li><a href="#box" data-transition="none"><img src="folder.png" class="icon"></a></li>
+		    </ul>
+		</div><!-- /navbar -->
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+<div data-role="page" id="box">
+
+	<div data-role="header" class="header" data-position="fixed" data-tap-toggle="false">
+		<img src="logo.png" class="logo">
+	</div><!-- /header -->
+
+	<div data-role="main" class="ui-content">
+	<ul class="record-box">
+		<a><li><p>Kikou Etienne - <strong>Again and Again</strong></p><p class="genre">Electronic</p><img class="arrow" src="arrow_right.png"></li></a>
+		<li><p>Kikou Etienne - <strong>Again and Again</strong></p><p class="genre">Electronic</p><img class="arrow" src="arrow_right.png"></li>
+		<li><p>Kikou Etienne - <strong>Again and Again</strong></p><p class="genre">Electronic</p><img class="arrow" src="arrow_right.png"></li>
+		<li><p>Kikou Etienne - <strong>Again and Again</strong></p><p class="genre">Electronic</p><img class="arrow" src="arrow_right.png"></li>
+	</ul>
+	</div><!-- /content -->
+
+	<div data-role="footer" data-position="fixed" class="footer" data-tap-toggle="false">
+		<div data-role="navbar" data-grid="b">
+		    <ul>
+		        <li><a href="#news" data-transition="none" data-direction="reverse"><img src="basket.png" class="icon"></a></li>
+		        <li><a href="#player"  data-transition="none" data-direction="reverse"><img src="youtube.png" class="icon"></a></li>
+		        <li><a href="#box" data-transition="none" class="ui-btn-active ui-state-persist"><img src="folder.png" class="icon"></a></li>
+		    </ul>
+		</div><!-- /navbar -->
+	</div><!-- /footer -->
+<script type="text/javascript">
+	
+</script>
+</div><!-- /page -->
+
+</body>
+</html>
